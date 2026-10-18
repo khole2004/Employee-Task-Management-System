@@ -41,6 +41,13 @@ const getInitialTaskUrlParams = () => {
   };
 };
 
+const VALID_STATUS_TRANSITIONS = {
+  Todo: ["In Progress", "Cancelled"],
+  "In Progress": ["Completed", "Cancelled"],
+  Completed: [],
+  Cancelled: [],
+};
+
 const API_BASE_URL =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL)
     ? import.meta.env.VITE_API_URL.replace(/\/+$/, "")
@@ -70,6 +77,7 @@ function App() {
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [statusUpdatingTaskId, setStatusUpdatingTaskId] = useState(null);
+  const [editingStatusTaskId, setEditingStatusTaskId] = useState(null);
 
   // Task Search, Filter, Sort, & Pagination state
   const [taskSearch, setTaskSearch] = useState(initialUrlParams.search);
@@ -733,6 +741,14 @@ function App() {
 
   const handleStatusUpdate = async (task, newStatus) => {
     if (!newStatus || newStatus === task.status) return;
+
+    const allowedTransitions = VALID_STATUS_TRANSITIONS[task.status] || [];
+    if (!allowedTransitions.includes(newStatus)) {
+      setTaskError(
+        `Cannot change task status from "${task.status}" to "${newStatus}".`
+      );
+      return;
+    }
 
     setTaskError("");
     setTaskSuccess("");
@@ -1913,31 +1929,89 @@ function App() {
                         {task.priority}
                       </span>
                     </td>
-                    <td>
-                      {["Completed", "Cancelled"].includes(task.status) ? (
-                        <span
-                          className={`badge status-${(task.status || "todo")
-                            .toLowerCase()
-                            .replace(/\s+/g, "-")}`}
-                          title="Final status cannot be changed"
-                        >
-                          {task.status}
-                        </span>
+                    <td className="status-cell">
+                      {editingStatusTaskId === task._id &&
+                      (VALID_STATUS_TRANSITIONS[task.status] || []).length > 0 ? (
+                        <div className="status-dropdown-wrapper">
+                          <select
+                            className={`status-select status-${(task.status || "todo")
+                              .toLowerCase()
+                              .replace(/\s+/g, "-")}`}
+                            defaultValue=""
+                            onChange={(e) => {
+                              if (e.target.value) {
+                                handleStatusUpdate(task, e.target.value);
+                                setEditingStatusTaskId(null);
+                              }
+                            }}
+                            onBlur={() => setEditingStatusTaskId(null)}
+                            disabled={statusUpdatingTaskId === task._id}
+                            autoFocus
+                            title="Select new status"
+                          >
+                            <option value="" disabled>
+                              Select new status...
+                            </option>
+                            {(VALID_STATUS_TRANSITIONS[task.status] || []).map(
+                              (nextStatus) => (
+                                <option key={nextStatus} value={nextStatus}>
+                                  &rarr; {nextStatus}
+                                </option>
+                              )
+                            )}
+                          </select>
+                          <button
+                            type="button"
+                            className="status-cancel-btn"
+                            onClick={() => setEditingStatusTaskId(null)}
+                            title="Cancel"
+                          >
+                            &times;
+                          </button>
+                        </div>
                       ) : (
-                        <select
-                          className={`status-select status-${(task.status || "todo")
-                            .toLowerCase()
-                            .replace(/\s+/g, "-")}`}
-                          value={task.status}
-                          onChange={(e) => handleStatusUpdate(task, e.target.value)}
-                          disabled={statusUpdatingTaskId === task._id}
-                          title="Update task status"
-                        >
-                          <option value="Todo">Todo</option>
-                          <option value="In Progress">In Progress</option>
-                          <option value="Completed">Completed</option>
-                          <option value="Cancelled">Cancelled</option>
-                        </select>
+                        <div className="status-badge-container">
+                          <span
+                            className={`badge status-${(task.status || "todo")
+                              .toLowerCase()
+                              .replace(/\s+/g, "-")}`}
+                            onClick={() => {
+                              if (
+                                (VALID_STATUS_TRANSITIONS[task.status] || [])
+                                  .length > 0
+                              ) {
+                                setEditingStatusTaskId(task._id);
+                              }
+                            }}
+                            style={{
+                              cursor:
+                                (VALID_STATUS_TRANSITIONS[task.status] || [])
+                                  .length > 0
+                                  ? "pointer"
+                                  : "default",
+                            }}
+                            title={
+                              (VALID_STATUS_TRANSITIONS[task.status] || [])
+                                .length > 0
+                                ? "Click to change status"
+                                : "Final status cannot be changed"
+                            }
+                          >
+                            {task.status}
+                          </span>
+                          {(VALID_STATUS_TRANSITIONS[task.status] || []).length >
+                            0 && (
+                            <button
+                              type="button"
+                              className="status-change-icon"
+                              onClick={() => setEditingStatusTaskId(task._id)}
+                              disabled={statusUpdatingTaskId === task._id}
+                              title={`Change status from ${task.status}`}
+                            >
+                              &#9662;
+                            </button>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td>

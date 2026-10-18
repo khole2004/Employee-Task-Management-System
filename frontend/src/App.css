@@ -567,6 +567,59 @@ tr:hover {
   font-weight: 500;
 }
 
+.status-cell {
+  white-space: nowrap;
+}
+
+.status-badge-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-change-icon {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 2px 5px;
+  font-size: 10px;
+  line-height: 1;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.status-change-icon:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+  color: #111827;
+}
+
+.status-dropdown-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-cancel-btn {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1;
+  padding: 3px 6px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.status-cancel-btn:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .filter-grid {
