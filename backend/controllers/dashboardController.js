@@ -10,6 +10,8 @@ const getDashboardSummary = async (req, res) => {
         const [
             totalEmployees,
             activeEmployees,
+            inactiveEmployees,
+            onLeaveEmployees,
             totalTasks,
             todoTasks,
             inProgressTasks,
@@ -23,6 +25,12 @@ const getDashboardSummary = async (req, res) => {
 
             // 2. Active Employees
             Employee.countDocuments({ status: "Active" }),
+
+            // Inactive Employees
+            Employee.countDocuments({ status: "Inactive" }),
+
+            // On Leave Employees
+            Employee.countDocuments({ status: "On Leave" }),
 
             // 3. Total Tasks
             Task.countDocuments({}),
@@ -90,6 +98,8 @@ const getDashboardSummary = async (req, res) => {
                 summary: {
                     totalEmployees,
                     activeEmployees,
+                    inactiveEmployees,
+                    onLeaveEmployees,
                     totalTasks,
                     todoTasks,
                     inProgressTasks,

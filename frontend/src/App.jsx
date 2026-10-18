@@ -1072,40 +1072,44 @@ function App() {
 
   return (
     <div className="app">
-      <h1>Employee & Task Management</h1>
+      <header className="app-topbar">
+        <nav className="topbar-nav">
+          <button
+            className={`topbar-tab ${page === "Dashboard" ? "active" : ""}`}
+            onClick={() => {
+              setPage("Dashboard");
+              setSuccess("");
+              loadDashboardData();
+            }}
+          >
+            Dashboard
+          </button>
 
-      <nav>
-        <button
-          className={page === "Dashboard" ? "active" : ""}
-          onClick={() => {
-            setPage("Dashboard");
-            setSuccess("");
-            loadDashboardData();
-          }}
-        >
-          Dashboard
-        </button>
+          <button
+            className={`topbar-tab ${page === "Employees" ? "active" : ""}`}
+            onClick={() => {
+              setPage("Employees");
+              setSuccess("");
+            }}
+          >
+            Employees
+          </button>
 
-        <button
-          className={page === "Employees" ? "active" : ""}
-          onClick={() => {
-            setPage("Employees");
-            setSuccess("");
-          }}
-        >
-          Employees
-        </button>
+          <button
+            className={`topbar-tab ${page === "Tasks" ? "active" : ""}`}
+            onClick={() => {
+              setPage("Tasks");
+              setSuccess("");
+            }}
+          >
+            Tasks
+          </button>
+        </nav>
 
-        <button
-          className={page === "Tasks" ? "active" : ""}
-          onClick={() => {
-            setPage("Tasks");
-            setSuccess("");
-          }}
-        >
-          Tasks
-        </button>
-      </nav>
+        <div className="topbar-title">
+          <span>MERN stack developer practical task</span>
+        </div>
+      </header>
 
       {page === "Dashboard" && (
         <div className="container">
@@ -1147,69 +1151,96 @@ function App() {
           {dashboardData && (
             <>
               {/* Summary Cards */}
-              <div className="stats-grid">
-                <div className="stat-card card-total-employees">
-                  <span className="stat-label">Total Employees</span>
-                  <div className="stat-value">
-                    {dashboardData.summary.totalEmployees}
+              {/* Summary Cards */}
+              <div className="dashboard-metrics-container">
+                <div className="dashboard-row-header">
+                  <h4>Employee Overview</h4>
+                </div>
+                <div className="stats-grid stats-grid-employees">
+                  <div className="stat-card card-total-employees">
+                    <span className="stat-label">Total Employees</span>
+                    <div className="stat-value">
+                      {dashboardData.summary.totalEmployees}
+                    </div>
+                    <span className="stat-desc">Registered in organization</span>
                   </div>
-                  <span className="stat-desc">Registered in organization</span>
+
+                  <div className="stat-card card-active-employees">
+                    <span className="stat-label">Active</span>
+                    <div className="stat-value">
+                      {dashboardData.summary.activeEmployees}
+                    </div>
+                    <span className="stat-desc">Currently working</span>
+                  </div>
+
+                  <div className="stat-card card-todo-tasks">
+                    <span className="stat-label">Inactive</span>
+                    <div className="stat-value">
+                      {dashboardData.summary.inactiveEmployees ?? 0}
+                    </div>
+                    <span className="stat-desc">Inactive status</span>
+                  </div>
+
+                  <div className="stat-card card-cancelled-tasks">
+                    <span className="stat-label">On Leave</span>
+                    <div className="stat-value">
+                      {dashboardData.summary.onLeaveEmployees ?? 0}
+                    </div>
+                    <span className="stat-desc">Currently on leave</span>
+                  </div>
                 </div>
 
-                <div className="stat-card card-active-employees">
-                  <span className="stat-label">Active Employees</span>
-                  <div className="stat-value">
-                    {dashboardData.summary.activeEmployees}
-                  </div>
-                  <span className="stat-desc">Currently working</span>
+                <div className="dashboard-row-header" style={{ marginTop: "24px" }}>
+                  <h4>Task Overview</h4>
                 </div>
-
-                <div className="stat-card card-total-tasks">
-                  <span className="stat-label">Total Tasks</span>
-                  <div className="stat-value">
-                    {dashboardData.summary.totalTasks}
+                <div className="stats-grid stats-grid-tasks">
+                  <div className="stat-card card-total-tasks">
+                    <span className="stat-label">Total Tasks</span>
+                    <div className="stat-value">
+                      {dashboardData.summary.totalTasks}
+                    </div>
+                    <span className="stat-desc">All created tasks</span>
                   </div>
-                  <span className="stat-desc">All created tasks</span>
-                </div>
 
-                <div className="stat-card card-todo-tasks">
-                  <span className="stat-label">Todo Tasks</span>
-                  <div className="stat-value">
-                    {dashboardData.summary.todoTasks}
+                  <div className="stat-card card-todo-tasks">
+                    <span className="stat-label">Todo</span>
+                    <div className="stat-value">
+                      {dashboardData.summary.todoTasks}
+                    </div>
+                    <span className="stat-desc">Pending action</span>
                   </div>
-                  <span className="stat-desc">Pending assignment / action</span>
-                </div>
 
-                <div className="stat-card card-inprogress-tasks">
-                  <span className="stat-label">In Progress Tasks</span>
-                  <div className="stat-value">
-                    {dashboardData.summary.inProgressTasks}
+                  <div className="stat-card card-inprogress-tasks">
+                    <span className="stat-label">In Progress</span>
+                    <div className="stat-value">
+                      {dashboardData.summary.inProgressTasks}
+                    </div>
+                    <span className="stat-desc">In development</span>
                   </div>
-                  <span className="stat-desc">Currently in development</span>
-                </div>
 
-                <div className="stat-card card-completed-tasks">
-                  <span className="stat-label">Completed Tasks</span>
-                  <div className="stat-value">
-                    {dashboardData.summary.completedTasks}
+                  <div className="stat-card card-completed-tasks">
+                    <span className="stat-label">Completed</span>
+                    <div className="stat-value">
+                      {dashboardData.summary.completedTasks}
+                    </div>
+                    <span className="stat-desc">Successfully finished</span>
                   </div>
-                  <span className="stat-desc">Successfully finished</span>
-                </div>
 
-                <div className="stat-card card-cancelled-tasks">
-                  <span className="stat-label">Cancelled Tasks</span>
-                  <div className="stat-value">
-                    {dashboardData.summary.cancelledTasks}
+                  <div className="stat-card card-cancelled-tasks">
+                    <span className="stat-label">Cancelled</span>
+                    <div className="stat-value">
+                      {dashboardData.summary.cancelledTasks}
+                    </div>
+                    <span className="stat-desc">Terminated tasks</span>
                   </div>
-                  <span className="stat-desc">Terminated tasks</span>
-                </div>
 
-                <div className="stat-card card-overdue-tasks">
-                  <span className="stat-label">Overdue Tasks</span>
-                  <div className="stat-value">
-                    {dashboardData.summary.overdueTasks}
+                  <div className="stat-card card-overdue-tasks">
+                    <span className="stat-label">Overdue</span>
+                    <div className="stat-value">
+                      {dashboardData.summary.overdueTasks}
+                    </div>
+                    <span className="stat-desc">Past due & not finished</span>
                   </div>
-                  <span className="stat-desc">Past due & not completed</span>
                 </div>
               </div>
 
@@ -2020,9 +2051,31 @@ function App() {
                         : "—"}
                     </td>
                     <td>
-                      {task.dueDate
-                        ? new Date(task.dueDate).toISOString().split("T")[0]
-                        : "—"}
+                      {task.dueDate ? (
+                        <span
+                          style={
+                            task.isOverdue
+                              ? { color: "#dc2626", fontWeight: 600 }
+                              : {}
+                          }
+                        >
+                          {new Date(task.dueDate).toISOString().split("T")[0]}
+                          {task.isOverdue && (
+                            <span
+                              style={{
+                                marginLeft: "6px",
+                                color: "#dc2626",
+                                fontSize: "12px",
+                                fontWeight: 700,
+                              }}
+                            >
+                              (Overdue)
+                            </span>
+                          )}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
                     </td>
                     <td>
                       <div className="actions-cell">
