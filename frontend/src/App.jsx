@@ -41,6 +41,11 @@ const getInitialTaskUrlParams = () => {
   };
 };
 
+const API_BASE_URL =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL)
+    ? import.meta.env.VITE_API_URL.replace(/\/+$/, "")
+    : "http://localhost:5000";
+
 function App() {
   const initialUrlParams = getInitialTaskUrlParams();
 
@@ -128,7 +133,7 @@ function App() {
     }
 
     const queryString = params.toString() ? `?${params.toString()}` : "";
-    const url = `http://localhost:5000/api/employees${queryString}`;
+    const url = `${API_BASE_URL}/api/employees${queryString}`;
     const fallbackUrl = `/api/employees${queryString}`;
 
     let response;
@@ -155,7 +160,7 @@ function App() {
   };
 
   const fetchDashboardData = async () => {
-    const url = "http://localhost:5000/api/dashboard";
+    const url = `${API_BASE_URL}/api/dashboard`;
     const fallbackUrl = "/api/dashboard";
 
     let response;
@@ -283,7 +288,7 @@ function App() {
     }
 
     const queryString = params.toString() ? `?${params.toString()}` : "";
-    const url = `http://localhost:5000/api/tasks${queryString}`;
+    const url = `${API_BASE_URL}/api/tasks${queryString}`;
     const fallbackUrl = `/api/tasks${queryString}`;
 
     let response;
@@ -582,7 +587,7 @@ function App() {
       }
 
       const queryString = params.toString() ? `?${params.toString()}` : "";
-      const url = `http://localhost:5000/api/tasks/export/csv${queryString}`;
+      const url = `${API_BASE_URL}/api/tasks/export/csv${queryString}`;
       const fallbackUrl = `/api/tasks/export/csv${queryString}`;
 
       let response;
@@ -697,7 +702,7 @@ function App() {
     setTaskError("");
     setTaskSuccess("");
 
-    const url = `http://localhost:5000/api/tasks/${task._id}`;
+    const url = `${API_BASE_URL}/api/tasks/${task._id}`;
     const fallbackUrl = `/api/tasks/${task._id}`;
 
     try {
@@ -733,7 +738,7 @@ function App() {
     setTaskSuccess("");
     setStatusUpdatingTaskId(task._id);
 
-    const url = `http://localhost:5000/api/tasks/${task._id}/status`;
+    const url = `${API_BASE_URL}/api/tasks/${task._id}/status`;
     const fallbackUrl = `/api/tasks/${task._id}/status`;
 
     try {
@@ -814,8 +819,8 @@ function App() {
 
     const isEditing = Boolean(editingTaskId);
     const url = isEditing
-      ? `http://localhost:5000/api/tasks/${editingTaskId}`
-      : "http://localhost:5000/api/tasks";
+      ? `${API_BASE_URL}/api/tasks/${editingTaskId}`
+      : `${API_BASE_URL}/api/tasks`;
     const fallbackUrl = isEditing
       ? `/api/tasks/${editingTaskId}`
       : "/api/tasks";
@@ -919,7 +924,7 @@ function App() {
     setError("");
     setSuccess("");
 
-    const url = `http://localhost:5000/api/employees/${employee._id}`;
+    const url = `${API_BASE_URL}/api/employees/${employee._id}`;
     const fallbackUrl = `/api/employees/${employee._id}`;
 
     try {
@@ -991,8 +996,8 @@ function App() {
 
     const isEditing = Boolean(editingEmployeeId);
     const url = isEditing
-      ? `http://localhost:5000/api/employees/${editingEmployeeId}`
-      : "http://localhost:5000/api/employees";
+      ? `${API_BASE_URL}/api/employees/${editingEmployeeId}`
+      : `${API_BASE_URL}/api/employees`;
     const fallbackUrl = isEditing
       ? `/api/employees/${editingEmployeeId}`
       : "/api/employees";
