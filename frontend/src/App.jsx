@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 
 const getInitialTaskUrlParams = () => {
@@ -91,6 +91,7 @@ function App() {
   const [taskTotalPages, setTaskTotalPages] = useState(1);
   const [taskTotal, setTaskTotal] = useState(0);
   const [exportLoading, setExportLoading] = useState(false);
+  const isExportingRef = useRef(false);
   const [viewingEmployee, setViewingEmployee] = useState(null);
   const [viewingTask, setViewingTask] = useState(null);
 
@@ -566,6 +567,10 @@ function App() {
   };
 
   const handleExportCSV = async () => {
+    if (isExportingRef.current || exportLoading) {
+      return;
+    }
+    isExportingRef.current = true;
     setTaskError("");
     setTaskSuccess("");
     setExportLoading(true);
@@ -638,6 +643,7 @@ function App() {
       setTaskError(err.message || "Failed to export tasks as CSV.");
     } finally {
       setExportLoading(false);
+      isExportingRef.current = false;
     }
   };
 
@@ -1658,6 +1664,7 @@ function App() {
 
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               <button
+                type="button"
                 className="add-button export-btn"
                 disabled={exportLoading}
                 onClick={handleExportCSV}

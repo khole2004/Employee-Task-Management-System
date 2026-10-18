@@ -175,6 +175,41 @@ const buildTaskFilter = (query) => {
     return filter;
 };
 
+const cleanDescription = (value) => {
+    if (value === null || value === undefined) return "";
+    let str = String(value);
+
+    // 1. Replace <br>, <br/>, <br /> with newline
+    str = str.replace(/<br\s*\/?>/gi, "\n");
+
+    // 2. Replace closing block elements with newline
+    str = str.replace(/<\/(p|div|li|h[1-6])>/gi, "\n");
+
+    // 3. Remove all remaining HTML tags
+    str = str.replace(/<[^>]+>/g, "");
+
+    // 4. Decode common HTML entities
+    str = str
+        .replace(/&nbsp;/gi, " ")
+        .replace(/&amp;/gi, "&")
+        .replace(/&quot;/gi, '"')
+        .replace(/&#39;|&apos;/gi, "'")
+        .replace(/&lt;/gi, "<")
+        .replace(/&gt;/gi, ">");
+
+    // 5. Normalize all carriage returns to standard newline \n
+    str = str.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+    // 6. Clean up line whitespace and collapse excessive blank lines
+    str = str
+        .split("\n")
+        .map((line) => line.trim())
+        .join("\n")
+        .replace(/\n{3,}/g, "\n\n");
+
+    return str.trim();
+};
+
 const escapeCSV = (value) => {
     if (value === null || value === undefined) return "";
     const str = String(value);
@@ -189,7 +224,10 @@ const formatCSVDate = (date) => {
     try {
         const d = new Date(date);
         if (Number.isNaN(d.getTime())) return "";
-        return d.toISOString().split("T")[0];
+        const year = d.getUTCFullYear();
+        const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+        const day = String(d.getUTCDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
     } catch {
         return "";
     }
@@ -346,6 +384,17 @@ const exportTasksCSV = async (req, res) => {
             });
         }
 
+        // Deduplicate tasks by unique _id / taskId to ensure each task is exported exactly once
+        const seen = new Set();
+        const uniqueTasks = [];
+        for (const task of tasks) {
+            const key = String(task._id || task.taskId);
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueTasks.push(task);
+            }
+        }
+
         const headers = [
             "Task ID",
             "Task Title",
@@ -361,20 +410,18 @@ const exportTasksCSV = async (req, res) => {
             "Overdue Status"
         ];
 
-        const rows = tasks.map((task) => {
+        const rows = uniqueTasks.map((task) => {
             const todayStr = new Date().toISOString().split("T")[0];
-            const dueDateStr = task.dueDate
-                ? new Date(task.dueDate).toISOString().split("T")[0]
-                : "";
+            const dueDateStr = formatCSVDate(task.dueDate);
 
             const isOverdue =
                 Boolean(dueDateStr && dueDateStr < todayStr) &&
                 !["Completed", "Cancelled"].includes(task.status);
 
-            return [
+            const rowCols = [
                 escapeCSV(task.taskId || task._id),
                 escapeCSV(task.title),
-                escapeCSV(task.description),
+                escapeCSV(cleanDescription(task.description)),
                 escapeCSV(task.employeeName),
                 escapeCSV(task.employeeId),
                 escapeCSV(task.department),
@@ -384,7 +431,9 @@ const exportTasksCSV = async (req, res) => {
                 escapeCSV(formatCSVDate(task.dueDate)),
                 escapeCSV(formatCSVDate(task.completedDate)),
                 escapeCSV(isOverdue ? "Yes" : "No")
-            ].join(",");
+            ];
+
+            return rowCols.join(",");
         });
 
         const csvContent = [headers.join(","), ...rows].join("\r\n");
@@ -392,9 +441,12 @@ const exportTasksCSV = async (req, res) => {
         const todayStr = new Date().toISOString().split("T")[0];
         const filename = `tasks_export_${todayStr}.csv`;
 
+        // Include UTF-8 Byte Order Mark (BOM) so spreadsheet programs like Excel parse UTF-8 and formatting cleanly
+        const BOM = "\uFEFF";
+
         res.setHeader("Content-Type", "text/csv; charset=utf-8");
         res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-        return res.status(200).send(csvContent);
+        return res.status(200).send(BOM + csvContent);
     } catch (error) {
         console.error("Export tasks error:", error);
         return res.status(500).json({
